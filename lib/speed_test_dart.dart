@@ -14,7 +14,10 @@ import 'package:xml/xml.dart';
 class SpeedTestDart {
   /// Returns [Settings] from speedtest.net.
   Future<Settings> getSettings() async {
-    final response = await http.get(Uri.parse(configUrl));
+    final response = await http.get(
+      Uri.parse(configUrl),
+      headers: {'User-Agent': 'speed_test_dart/1.0'},
+    );
     final settings = Settings.fromXMLElement(
       XmlDocument.parse(response.body).getElement('settings'),
     );
@@ -23,7 +26,10 @@ class SpeedTestDart {
     for (final element in serversUrls) {
       if (serversConfig.servers.isNotEmpty) break;
       try {
-        final resp = await http.get(Uri.parse(element));
+        final resp = await http.get(
+          Uri.parse(element),
+          headers: {'User-Agent': 'speed_test_dart/1.0'},
+        );
 
         serversConfig = ServersList.fromXMLElement(
           XmlDocument.parse(resp.body).getElement('settings'),
@@ -60,15 +66,18 @@ class SpeedTestDart {
 
       stopwatch.start();
       try {
-        await http.get(latencyUri).timeout(
-              Duration(
-                seconds: timeoutInSeconds,
-              ),
-              onTimeout: (() => http.Response(
-                    '999999999',
-                    500,
-                  )),
-            );
+        await http.get(
+          latencyUri,
+          headers: {'User-Agent': 'speed_test_dart/1.0'},
+        ).timeout(
+          Duration(
+            seconds: timeoutInSeconds,
+          ),
+          onTimeout: (() => http.Response(
+                '999999999',
+                500,
+              )),
+        );
         // If a server fails the request, continue in the iteration
       } catch (_) {
         continue;
@@ -136,7 +145,10 @@ class SpeedTestDart {
         await Future.forEach(testData, (String td) async {
           await semaphore.acquire();
           try {
-            final data = await http.get(Uri.parse(td));
+            final data = await http.get(
+              Uri.parse(td),
+              headers: {'User-Agent': 'speed_test_dart/1.0'},
+            );
             tasks.add(data.bodyBytes.length);
           } finally {
             semaphore.release();
